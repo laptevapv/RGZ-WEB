@@ -41,7 +41,7 @@ def db_close(conn, cur):
 
 @app.route('/')
 def menu():
-    user_status = session.get('login', 'Неавторезированный пользователь')
+    user_status = session.get('login', 'Аноним')
     return render_template('menu.html', user_status=user_status)
 
 
@@ -53,7 +53,7 @@ def register():
     login = request.form.get('login')
     password = request.form.get('password')
     if not (login and password):
-        return render_template('register.html', error='Введите все данные')
+        return render_template('register.html', error='Заполните все поля')
     
     conn, cur = db_connect()
 
@@ -85,7 +85,7 @@ def login():
     login = request.form.get('login')
     password = request.form.get('password')
     if not (login and password):
-        return render_template('login.html', error='Введите все данные')
+        return render_template('login.html', error='Заполните все поля')
     
     conn, cur = db_connect()
     
@@ -107,76 +107,73 @@ def logout():
     session.pop('login', None)  # Удаление логина из сессии
     return redirect(url_for('menu'))  # Перенаправляем на главную страницу после выхода
 
-rooms = [{'number': i, 'tenant': ""} for i in range(1, 101)]
+rooms = []
+for i in range(1, 101):
+    rooms.append({'number': i, 'tenant': ""})
 
 @app.route('/rooms/json-rpc-api', methods=['POST'])
 def api():
     data = request.json
     id = data['id']
-    
     if data['method'] == 'info':
-        return jsonify({
+        return {
             'jsonrpc': '2.0',
             'result': rooms,
             'id': id
-        })
-
+        }
     login = session.get('login')
     if not login: 
-        return jsonify({
-            'jsonrpc': '2.0',
+        return {
+            'jsonrpc': '2.0', 
             'error': {
                 'code': 1,
                 'message': 'Unauthorized'
             },
             'id': id
-        })
-
-    room_number = data['params']
-
-    if data['method'] == 'bookings':
+        }
+    if data['method'] == 'booking':
+        room_number = data['params']
         for room in rooms:
             if room['number'] == room_number:
                 if room['tenant'] != '':
-                    return jsonify({
+                    return {
                         'jsonrpc': '2.0', 
                         'error': {
                             'code': 2,
                             'message': 'Already'
                         },
                         'id': id
-                    })
+                    }
                 room['tenant'] = login
-                return jsonify({
+                return {
                     'jsonrpc': '2.0', 
                     'result': 'success',
                     'id': id
-                })
-
+                }
     if data['method'] == 'cancellation':
+        room_number = data['params']
         for room in rooms:
             if room['number'] == room_number:
                 if room['tenant'] != login:
-                    return jsonify({
+                    return {
                         'jsonrpc': '2.0',
                         'error': {
                             'code': 3,
                             'message': 'Forbidden'
                         },
                         'id': id
-                    })
+                    }
                 room['tenant'] = ''
-                return jsonify({
+                return {
                     'jsonrpc': '2.0',
                     'result': 'success',
                     'id': id
-                })
-
-    return jsonify({
+                }
+    return {
         'jsonrpc': '2.0', 
         'error': {
             'code': -32601,
             'message': 'Method not found'
         },
         'id': id
-    })
+    }
