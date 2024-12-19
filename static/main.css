@@ -1,0 +1,89 @@
+/* Основные стили для всего документа */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+}
+
+/* Стили для заголовка */
+header {
+    background: linear-gradient(135deg, #6a11cb, #2575fc); /* Градиентный фон */
+    color: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Тень для заголовка */
+}
+
+/* Стили для области регистрации */
+.av_reg {
+    background-color: #e0f7fa; /* Светлый цвет для области регистрации */
+    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px; /* Отступы вокруг области регистрации */
+}
+
+/* Стили для ссылок в области регистрации */
+.av_reg a {
+    text-decoration: none;
+    color: #00796b; /* Основной цвет ссылок */
+    font-size: 16pt; /* Увеличенный размер шрифта */
+    transition: color 0.3s ease; /* Плавный переход цвета при наведении */
+}
+
+.av_reg a:hover {
+    color: #004d40; /* Более темный цвет при наведении */
+}
+
+/* Стили для списка комнат */
+ul {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Авто-адаптивная сетка */
+    gap: 15px;
+    padding: 20px; /* Отступы вокруг списка */
+}
+
+/* Стили для элементов списка */
+li {
+    background-color: #ffffff; /* Белый фон для элементов списка */
+    border-radius: 10px; /* Закругленные углы */
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Более выраженная тень */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Плавные эффекты при наведении */
+}
+
+li:hover {
+    transform: translateY(-5px); /* Подъем элемента при наведении */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Увеличенная тень при наведении */
+}
+
+/* Стили для подвала */
+footer {
+    background-color: #333; /* Темный фон для подвала */
+    color: white; /* Белый текст для подвала */
+    padding: 20px;
+    text-align: center;
+}
+
+/* Дополнительные стили для текста в элементах списка */
+li div {
+    margin-bottom: 10px; /* Отступ между текстовыми элементами */
+}
+
+button {
+    background-color: #00796b; /* Цвет кнопок */
+    color: white; /* Белый текст на кнопках */
+    border: none; /* Без рамки */
+    border-radius: 5px; /* Закругленные углы для кнопок */
+    padding: 10px 15px; /* Отступы внутри кнопок */
+    cursor: pointer; /* Указатель курсора при наведении */
+    transition: background-color 0.3s ease; /* Плавный переход цвета фона кнопок */
+}
+
+button:hover {
+    background-color: #004d40; /* Темный цвет кнопок при наведении */
+}

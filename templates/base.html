@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <title>Камера хранения</title>
+    {% block script %}{% endblock %}
+</head>
+<body>
+    <header>
+        Камера Хранения. Лаптева Полина ФБИ-24, 3 курс, 2024
+        <div style="float: right;">
+            {% if user_status %}
+                {{ user_status }}
+            {% else %}
+              Неавторезированный пользователь
+            {% endif %}
+        </div>
+    </header>
+    <main>
+        {% block main %}{% endblock %}
+    </main>
+    <footer>
+        &copy; Лаптева Полина ФБИ-24, 3 курс, 2024
+    </footer>
+</body>
+</html>

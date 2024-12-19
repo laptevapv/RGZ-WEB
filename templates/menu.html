@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block script %}
+<script>
+   let bookedRooms = []; // Массив для хранения номеров забронированных комнат
+
+function getRoomList() {
+    const url = '/rooms/json-rpc-api';
+    const json = {
+        'jsonrpc': '2.0',
+        'method': 'info',
+        'id': Math.round(Math.random() * 1000)
+    };
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(json)
+    })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            const room_list = data.result;
+            const ul = document.getElementById('room-list');
+            ul.innerHTML = ''; // Очищаем список перед обновлением
+
+            // Считаем количество занятых и свободных ячеек
+            let occupiedCount = 0;
+            let freeCount = 0;
+
+            for (let i = 0; i < room_list.length; i++) {
+                const room = room_list[i];
+                if (room.tenant) {
+                    occupiedCount++; // Увеличиваем счётчик занятых ячеек
+                } else {
+                    freeCount++; // Увеличиваем счётчик свободных ячеек
+                }
+
+                const li = document.createElement('li');
+                li.style.display = 'flex'; // Используем flexbox для вертикального выравнивания
+                li.style.flexDirection = 'column'; // Текст будет сверху, кнопка снизу
+                li.style.alignItems = 'center'; // Выравниваем по центру
+                li.style.padding = '10px'; // Добавляем отступы
+                li.style.margin = '5px'; // Добавляем отступы между элементами
+
+                // Устанавливаем цвет ячейки в зависимости от статуса
+                if (room.tenant) {
+                    li.style.backgroundColor = 'red'; // Занятая комната
+                } else {
+                    li.style.backgroundColor = 'green'; // Свободная комната
+                }
+
+                // Добавляем текст с номером комнаты и именем арендатора (или "свободно")
+                const roomInfo = document.createElement('div');
+                roomInfo.style.fontWeight = 'bold'; // Жирный текст для номера комнаты
+                roomInfo.innerText = `Комната ${room.number}`
+                li.appendChild(roomInfo);
+
+                const tenantInfo = document.createElement('div');
+                tenantInfo.innerText = room.tenant || 'Свободно';
+                tenantInfo.style.marginTop = '5px';
+                li.appendChild(tenantInfo);
+
+                if (!room.tenant) {
+                    const bookingButton = document.createElement('button');
+                    bookingButton.innerText = 'Бронь';
+                    bookingButton.onclick = function () { booking(room.number); };
+                    li.appendChild(bookingButton);
+                } else {
+                    const releaseButton = document.createElement('button');
+                    releaseButton.innerText = 'Отменить бронь';
+                    releaseButton.onclick = function () { release(room.number); };
+                    li.appendChild(releaseButton);
+                }
+
+                ul.appendChild(li);
+            }
+
+            // Обновляем статистику
+            const statsElement = document.getElementById('room-stats');
+            statsElement.innerText = `Занятых ячеек: ${occupiedCount}, свободных ячеек: ${freeCount}`;
+        });
+}
+
+function booking(roomNumber) {
+    if (bookedRooms.length >= 5) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.innerText = 'Бронь более пяти помещений запрещена';
+        errorDiv.style.color = 'red';
+        return;
+    }
+
+    const url = '/rooms/book'; // Предполагаемый URL для бронирования
+    const json = {
+        'jsonrpc': '2.0',
+        'method': 'book',
+        'params': { 'roomNumber': roomNumber },
+        'id': Math.round(Math.random() * 1000)
+    };
+
+    fetch(url, {
+
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(json)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.result) {
+            bookedRooms.push(roomNumber);
+            getRoomList(); // Обновляем список комнат после бронирования
+        } else {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerText = data.error.message || 'Ошибка при бронировании';
+            errorDiv.style.color = 'red';
+        }
+    });
+}
+
+// Функция для отмены бронирования
+function release(roomNumber) {
+    const url = '/rooms/release'; // Предполагаемый URL для отмены бронирования
+    const json = {
+        'jsonrpc': '2.0',
+        'method': 'release',
+        'params': { 'roomNumber': roomNumber },
+        'id': Math.round(Math.random() * 1000)
+    };
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(json)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.result) {
+            bookedRooms = bookedRooms.filter(num => num !== roomNumber);
+            getRoomList(); // Обновляем список комнат после отмены бронирования
+        } else {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerText = data.error.message || 'Ошибка при отмене бронирования';
+            errorDiv.style.color = 'red';
+        }
+    });
+}
+
+// Вызов функции для получения списка комнат при загрузке страницы
+getRoomList();
+for (let i = 0; i < room_list.length; i++) {
+    const room = room_list[i];
+    if (room.tenant) {
+        occupiedCount++;
+    } else {
+        freeCount++;
+    }
+
+    const li = document.createElement('li');
+    li.style.display = 'flex';
+    li.style.flexDirection = 'column';
+    li.style.alignItems = 'center';
+    li.style.padding = '10px';
+    li.style.margin = '5px';
+
+    li.innerText = `Комната ${room.number} - ${room.tenant ? 'Занята' : 'Свободна'}`;
+    ul.appendChild(li); // Добавляем элемент в список
+
+    // Добавление кнопки для бронирования или освобождения
+    const button = document.createElement('button');
+    button.innerText = room.tenant ? 'Освободить' : 'Забронировать';
+    button.onclick = () => {
+        if (room.tenant) {
+            release(room.number);
+        } else {
+            booking(room.number);
+        }
+    };
+    li.appendChild(button);
+}
+
+</script>
+{% endblock %}
+{% block main %}
+    <div class="av_reg">
+        <a href="{{ url_for('logout') }}" class="block">Выйти</a>
+        <a href="{{ url_for('register') }}" class="block">Зарегистрироваться</a>
+        <a href="{{ url_for('login') }}" class="block">Войти</a>
+    </div>
+    <h2>Комната хранения</h2>
+    <div id="room-stats" style="margin-bottom: 20px; font-weight: bold;"></div> 
+    <div id="error-message" style="color: red; margin-bottom: 20px;"></div> 
+    <ul id="room-list"></ul>
+{% endblock %}
