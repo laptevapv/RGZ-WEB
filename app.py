@@ -85,10 +85,11 @@ def login():
     if not (login and password):
         return render_template('login.html', error='Заполните все поля')
     
-    conn, cur = db_connect()
+    # Передаем аргумент db_type при вызове db_connect
+    conn, cur = db_connect(app.config['DB_TYPE'])
     
-    if current_app.config['DB_TYPE'] == 'postgres':
-        cur.execute(f"SELECT * FROM users WHERE login=%s;", (login,))
+    if app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT * FROM users WHERE login=%s;", (login,))
     else:
         cur.execute("SELECT * FROM users WHERE login=?;", (login,))
 
@@ -97,7 +98,7 @@ def login():
         db_close(conn, cur)
         return render_template('login.html', error='Логин и/или пароль неверны')
     session['login'] = login
-    db_close(conn,cur)
+    db_close(conn, cur)
     return redirect(url_for('menu'))  # Перенаправляем на главную страницу после входа
 
 @app.route('/logout')
