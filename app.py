@@ -13,10 +13,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'секретно-секретный секрет')
 app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
 
-def db_connect():
-#   Устанавливает подключение к базе данных.
-    
-    if current_app.config['DB_TYPE'] == 'postgres':
+def db_connect(db_type):
+    if db_type == 'postgres':
         conn = psycopg2.connect(
             host='127.0.0.1',
             database='rgz_web',
